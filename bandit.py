@@ -11,9 +11,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import beta, norm, rv_continuous, rv_discrete
 from collections.abc import Callable
-from numba import njit
+from numba import jit
+from numba.experimental import jitclass
+from numba import int32, float64, from_dtype
 
+history = np.dtype([('x', np.int32),('y', np.float64)])                  
+spec = [
+    ("arms", float64[:]),
+    ("best_arm", int32),
+    ("history", from_dtype(history)[:]),
+    ("sample_means", float64[:]),
+    ("counts", float64[:]),
+    ("regret", float64),
+]
 
+@jitclass
 class Bandit:
 
     def __init__(self, arms: list[rv_discrete | rv_continuous]):
@@ -23,7 +35,7 @@ class Bandit:
         """
         self.arms = arms
         self.best_arm: int = np.argmax([arm.mean() for arm in arms])
-        # history of rewards and actions for each round
+        # history of actions and rewards for each round
         self.history: list[(int, float)] = []
         self.sample_means, self.counts = np.zeros(len(arms)), np.zeros(len(arms))
         self.regret = 0
@@ -86,13 +98,7 @@ class BanditAlgorithm:
             n_rounds (int): number of rounds to run the algorithm
         """
         for _ in range(n_rounds):
-            arm = self.bandit_algo(
-                bandit.history,
-                len(bandit.arms),
-                bandit.sample_means,
-                bandit.counts,
-                *args,
-            )
+            arm = self.bandit_algo(bandit, *args)
             bandit.pull(arm)
 
 
@@ -103,6 +109,7 @@ def run_bandit_algorithm(
     n_rounds: int,
     *args,
     **kwargs,
+    # plot: bool = False,
 ):
     """
     Args:
@@ -121,90 +128,72 @@ def run_bandit_algorithm(
         berBandit.plot_history(name)
     return berBandit.regret
 
-
-@njit
-def explore_then_commit(
-    history: list[tuple[int, float]],
-    n_arms: int,
-    sample_means: np.ndarray,
-    counts: np.ndarray,
-    explore_rounds: int,
-) -> int:
+@jit
+def explore_then_commit(bandit: Bandit, explore_rounds: int) -> int:
     """
     Args:
         history (list): list of rewards and actions for past rounds
         explore_rounds (int): number of rounds to explore
     """
+    history = bandit.history
+    n = len(bandit.arms)
 
-    if len(history) < explore_rounds * n_arms:
-        return len(history) % n_arms
+    if len(history) < explore_rounds * n:
+        return len(history) % n
     else:
-        return np.argmax(sample_means)
+        return np.argmax(bandit.sample_means)
 
-
-@njit
-def epsilon_greedy(
-    history: list[tuple[int, float]],
-    n_arms: int,
-    sample_means: np.ndarray,
-    counts: np.ndarray,
-    epsilon: float,
-) -> int:
+@jit
+def epsilon_greedy(bandit: Bandit, epsilon: float) -> int:
     """
     Args:
         history (list): list of rewards and actions for past rounds
         epsilon (float): probability of exploration
     """
+    history = bandit.history
+    n = len(bandit.arms)
     if np.random.rand() < epsilon:
-        return np.random.randint(n_arms)
+        return np.random.randint(n)
     else:
-        return np.argmax(sample_means)
+        return np.argmax(bandit.sample_means)
 
-
-@njit
-def ucb(
-    history: list[tuple[int, float]],
-    n_arms: int,
-    sample_means: np.ndarray,
-    counts: np.ndarray,
-    c: float,
-) -> int:
+@jit
+def ucb(bandit: Bandit, c: float = 1) -> int:
     """
     Args:
         history (list): list of rewards and actions for past rounds
         c (float): exploration parameter
     """
-    if len(history) < n_arms:
+    history = bandit.history
+    n = len(bandit.arms)
+    if len(history) < n:
         return len(history)
     else:
-        ucbs = sample_means + c * np.sqrt(2 * np.log(len(history) + 1) / counts)
+        ucbs = bandit.sample_means + c * np.sqrt(
+            2 * np.log(len(history) + 1) / bandit.counts
+        )
         return np.argmax(ucbs)
 
-
-@njit
-def thompson_sampling(
-    history: list[tuple[int, float]],
-    n_arms: int,
-    sample_means: np.ndarray,
-    counts: np.ndarray,
-    num_samples: int = 1,
-) -> int:
+@jit
+def thompson_sampling(bandit: Bandit, num_samples: int = 1) -> int:
     """
     Args:
         history (list): list of rewards and actions for past rounds
     """
-    if len(history) < n_arms:
+    history = bandit.history
+    n = len(bandit.arms)
+    if len(history) < n:
         return len(history)
     else:
         # we take samples of beta(x,y) where x = 1 + total rewards and y = 1 + total failures
         samples = [
             sum(
                 beta.rvs(
-                    1 + sample_means[i] * counts[i],
-                    1 + (1 - sample_means[i]) * counts[i],
+                    1 + bandit.sample_means[i] * bandit.counts[i],
+                    1 + (1 - bandit.sample_means[i]) * bandit.counts[i],
                 )
                 for _ in range(num_samples)
             )
-            for i in range(n_arms)
+            for i in range(n)
         ]
         return np.argmax(samples)
