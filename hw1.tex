@@ -1,0 +1,239 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Define Article %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Using Packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{empheq}
+\usepackage{mdframed}
+\usepackage{booktabs}
+\usepackage{lipsum}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{psfrag}
+\usepackage{pgfplots}
+\usepackage{bm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Other Settings
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Page Setting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\geometry{a4paper}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Define some useful colors %%%%%%%%%%%%%%%%%%%%%%%%%%
+\definecolor{ocre}{RGB}{243,102,25}
+\definecolor{mygray}{RGB}{243,243,244}
+\definecolor{deepGreen}{RGB}{26,111,0}
+\definecolor{shallowGreen}{RGB}{235,255,255}
+\definecolor{deepBlue}{RGB}{61,124,222}
+\definecolor{shallowBlue}{RGB}{235,249,255}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Define an orangebox command %%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand\orangebox[1]{\fcolorbox{ocre}{mygray}{\hspace{1em}#1\hspace{1em}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% English Environments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newtheoremstyle{mytheoremstyle}{3pt}{3pt}{\normalfont}{0cm}{\rmfamily\bfseries}{}{1em}{{\color{black}\thmname{#1}~\thmnumber{#2}}\thmnote{\,--\,#3}}
+\newtheoremstyle{myproblemstyle}{3pt}{3pt}{\normalfont}{0cm}{\rmfamily\bfseries}{}{1em}{{\color{black}\thmname{#1}~\thmnumber{#2}}\thmnote{\,--\,#3}}
+\theoremstyle{mytheoremstyle}
+\newmdtheoremenv[linewidth=1pt,backgroundcolor=shallowGreen,linecolor=deepGreen,leftmargin=0pt,innerleftmargin=20pt,innerrightmargin=20pt,]{theorem}{Theorem}[section]
+\theoremstyle{mytheoremstyle}
+\newmdtheoremenv[linewidth=1pt,backgroundcolor=shallowBlue,linecolor=deepBlue,leftmargin=0pt,innerleftmargin=20pt,innerrightmargin=20pt,]{definition}{Definition}[section]
+\theoremstyle{myproblemstyle}
+\newmdtheoremenv[linecolor=black,leftmargin=0pt,innerleftmargin=10pt,innerrightmargin=10pt,]{problem}{Problem}[section]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting Settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepgfplotslibrary{colorbrewer}
+\pgfplotsset{width=8cm,compat=1.9}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\DeclareMathOperator{\Reg}{Reg}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Title & Author %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{HW 1}
+\author{Karthik Dulam}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+    \maketitle
+    \section*{Problem 1}
+The Bayesian Update rule in terms of densities is given by 
+$$ \pi_1(\omega) = \pi_0(\omega) \frac {\mathbb P(X | \omega)} {\int_\Omega \mathbb P(X | \omega) d\pi_0(\omega)}$$
+alternatively written as
+$$ p(\omega | X) = p(\omega) \frac {\mathbb P(X | \omega)} {\int_\Omega \mathbb P(X | \omega) dp(\omega)}$$
+where $\pi_0 = p$ is the density of the prior distribution, $\pi_1(\omega) := p(\omega | X) \forall \omega$  is density of the posterior distribution, 
+and $X$ is the evidence/observations on which this update is based on.
+
+\subsection*{Subpart a}
+The pdf of a Beta prior for fixed parameters $\alpha, \beta$ is given by $$p(\omega) = c_{\alpha, \beta} \omega^{\alpha - 1}(1-\omega)^{\beta - 1}$$ 
+where $\omega \in [0,1]$. 
+If the Beta prior describes the parameter $p$ of a Geometric random variable with mean $1/p$, then 
+$$\mathbb P(X | \omega) = (1-\omega)^{X-1}\omega$$
+thus the posterior becomes 
+$$ c'  \omega^{\alpha + 1 - 1}(1-\omega)^{\beta + X - 1 - 1} = c_{\alpha + 1, \beta + X - 1} \omega^{\alpha + 1 - 1}(1-\omega)^{\beta + X - 1 - 1} $$
+(last equality due to the fact that it is a density) which is the density of the Beta distribution with parameters
+$\alpha + 1, \beta + X - 1$
+thus the posterior is also Beta for any observation $X$ distributed as a Geometric.
+This proves Beta is conjugate prior to Geometric.
+
+\subsection*{Subpart b}
+The pdf of a Gamma prior for fixed parameters $k, \theta$ is given by 
+$$p(\omega) = c_{k, \theta} \omega^{k-1}e^{-\omega/\theta}$$
+If the Gamma prior describes the parameter $\lambda$ of a Poisson random variable with mean $\lambda$, then 
+$$\mathbb P(X | \omega) = \frac{\omega^X e^{-\omega}} {X!}$$
+thus the posterior becomes 
+$$ c' \omega^{k + X  - 1}e^{-\omega(1+\theta^{-1})}=  c_{k + X, (1+\theta^{-1})^{-1}} \omega^{k+X-1}e^{-\omega(1+\theta^{-1})}$$
+(last equality due to the fact that it is a density) which is the density of the Gamma distribution with parameters
+$k + X, (1+\theta^{-1})^{-1}$
+thus the posterior is also Gamma for any observation $X$ distributed as a Poisson.
+This proves Gamma is conjugate to prior to Poisson.
+
+\subsection*{Subpart c}
+The pdf of a Normal prior for fixed parameters $\mu, \sigma^2$ is given by 
+$$p(\omega) = c_\sigma \exp\left(-\frac{(\omega - \mu)^2}{2\sigma^2}\right)$$
+If the Normal prior describes the parameter $\mu$ of a Normal random variable $X$ with mean $\mu$ and variance 1, then 
+$$\mathbb P(X | \omega) = \frac{1}{\sqrt{2\pi}} \exp\left(-\frac{(X - \omega)^2}{2}\right)$$
+thus the posterior becomes 
+$$ c' \exp\left(-\frac{(\omega - \mu)^2}{2\sigma^2} - \frac{(X - \mu)^2}{2}\right) = c_{\sigma'} \exp\left(-\frac{1}{2}\left[\left(\frac{1}{\sigma^2} + 1\right)\omega^2 - 2\left(\frac{\mu}{\sigma^2} + X\right)\omega\right]\right)$$
+which is the kernel of a Normal distribution. Completing the square, we find that the posterior is Normal with parameters
+$$\mu' = \frac{\frac{\omega}{\sigma^2} + X}{\frac{1}{\sigma^2} + 1}$$
+and
+$${\sigma^\prime}^2 = \frac{1}{\frac{1}{\sigma^2} + 1}$$
+thus the posterior is also Normal for any observation $X$ distributed as a Normal.
+This proves Normal is conjugate prior to Normal (with variance 1).
+
+\section*{Problem 2}
+
+\subsection*{Subpart a}
+Let $f_t(x,y)$ be the probability mass function for the 2-dimensional random variable $(\hat\mu_t(1), \hat\mu_t(2))$,
+where $(x,y) \in \Omega_t := \{ \frac{i}{j} : i \text{ and } j\neq 0 \in \{0,1,\ldots,t\}\}^2$
+We know 
+\begin{align*}
+  \text{Reg}(n) &= \sum_{t=0}^n \Delta \mathbb P(I_t = 1)\\
+                &\geq \sum_{t=3}^n \Delta \sum_{\Omega_t} \mathbb P(I_t = 1, (\hat\mu_t(1), \hat\mu_t(2)) = (x,y)) f_t(x,y)\\
+                &= \sum_{t=3}^n \Delta \sum_{\Omega_t} \frac{e^{\beta \hat\mu_t(1)}}{e^{\beta \hat\mu_t(1)} + e^{\beta \hat\mu_t(2)}} f_t(x,y)\\
+                &= \sum_{t=3}^n \Delta \sum_{\Omega_t} \frac{1}{1 + e^{\beta (\hat\mu_t(1) - \hat\mu_t(2))}} f_t(x,y)
+\end{align*}
+Now $$\min_{x,y \in \Omega_t} \frac{1}{1 + e^{\beta (\hat\mu_t(1) - \hat\mu_t(2))}} = \frac{1}{1 + e^{\beta \frac{t}{t}}} = \frac{1}{1 + e^\beta}$$.
+Thus, we have 
+\begin{align*}
+  \text{Reg}(n) &\geq \sum_{t=3}^n \Delta \frac{1}{1 + e^\beta} \sum_{\Omega_t} f_t(x,y)\\
+                &= \sum_{t=3}^n \Delta \frac{1}{1 + e^\beta}\\ 
+                &= \frac{n-2}{1 + e^\beta}
+\end{align*}
+Thus the regret is lower bounded by $\frac{n-2}{1 + e^\beta}$ and the Boltzmann Exploration Algorithm cannot achieve sublinear regret.
+
+\subsection*{Subpart b}
+If the rewards are deterministically equal to $\mu_1$ and $\mu_2$, then the sample means $\hat\mu_t(1)$ and $\hat\mu_t(2)$ are equal to $\mu_1$ and $\mu_2$ respectively.
+Then 
+\begin{align*}
+  \mathbb E[N_n(1)] &= \sum_{t=1}^n \mathbb P(I_t = 1) \\
+                    &= \sum_{t=1}^n \frac{e^{\beta_t \mu_1}}{e^{\beta_t \mu_1} + e^{\beta_t \mu_2}}\\ 
+                    &= \sum_{t=1}^n \frac{1}{1 + e^{\beta_t (\mu_2 - \mu_1)}}\\
+                    &= \sum_{t=1}^n \frac{1}{1 + e^{\beta_t \Delta}}
+\end{align*}
+We want this summation to asymptotically grow as $\frac{\log n}{\Delta^2}$.
+Recall that the summation $\sum_{i = 1}^n \frac{1}{i}$ asymptotically grows as $\log n$.
+Thus if we set $\beta_t = \log(t\Delta^2)/\Delta$, we get
+$$ \mathbb E[N_n(1)] = \sum_{t=1}^n \frac{1}{1 + e^{\beta_t \Delta}} = \sum_{t=1}^n \frac{1}{1 + e^{\log(t\Delta^2)}} = \sum_{t=1}^n \frac{1}{1 + t\Delta^2}$$
+which for large $n$ grows as $$\sum_{t=1}^n \frac{1}{t\Delta^2} = \frac{\log n}{\Delta^2}$$
+
+\section*{Problem 3}
+\subsection*{Subpart a}
+An upperbound of the regret of the Explore then Commit algorithm is given by 
+\[
+  \Reg(ETC, n) \leq O(m\Delta + n\Delta\exp{\frac{-m\Delta^2}{2}})
+\]
+but if we knew the time horizion and the order of $\Delta$, then we can set 
+\[
+  m \approx \frac{2}{\Delta^2} \log(n\Delta)
+\]
+so that the upperbound becomes 
+\[
+  \Reg(ETC, n) \leq O(\frac{2}{\Delta^2}\log(n))
+\]
+
+\subsection*{Part b}
+If $m$ is chosen to be larger than $n^{2/3}$, i.e. $m = n^{2/3+\delta}$ where $\delta>0$.
+Then 
+\[
+  \Reg(ETC, n) \leq O(n^{2/3+\delta}\Delta + n\Delta\exp{(\frac{-n^{2/3 + \delta}\Delta^2}{2})})
+\]
+
+Choose $\Delta$ so that the equation
+\[
+  \exp{(-n^{2/3 + \delta}\Delta^2/2)} = n^{-1/3 + \delta}(\Delta^{-1}-1)
+\]
+is satisfied.
+Then the regret becomes 
+\[
+  \Reg(ETC, n) \leq O(n^{2/3+\delta}\Delta + n\Delta n^{-1/3 + \delta}(\Delta^{-1}-1)) = O(n^{2/3+\delta})
+\]
+The implicit equation has a solution because when $\Delta = 1$, the RHS is 0 and 
+LHS $= \exp{(-n^{2/3 + \delta}/2)} > 0$, i.e. LHS $>$ RHS.
+When $\Delta > 0$ but for values arbitrarily close to zero, RHS diverges to $\infty$ while LHS converges to 1, i.e. LHS $<$ RHS.
+
+Since both LHS and RHS are continuous functions of $\Delta$, the equation has a solution $\Delta_n \in (0,1)$ for each $n$.
+
+\subsection*{Part c}
+If $m = n^{2/3 - \delta}$, then 
+
+\[
+  \Reg(ETC, n) \leq O(n^{2/3-\delta}\Delta + n\Delta\exp{(\frac{-n^{2/3 - \delta}\Delta^2}{2})})
+\]
+Choose $\Delta$ so that the equation
+\[
+  \exp{(-n^{2/3 + \delta}\Delta^2/2)} = n^{-1/3}(\Delta^{-1}-n^{-\delta})
+\]
+is satisfied.
+Then the regret becomes 
+\[
+  \Reg(ETC, n) \leq O(n^{2/3-\delta}\Delta + n\Delta n^{-1/3}(\Delta^{-1}-n^{-\delta})) = O(n^{2/3})
+\]
+The implicit equation has a solution because when $\Delta = n^{-\delta} < 1$, the RHS is 0 and 
+LHS $= \exp{(-n^{2/3 - \delta}/2)} > 0$, i.e. LHS $>$ RHS.
+When $\Delta > 0$ but for values arbitrarily close to zero, RHS diverges to $\infty$ while LHS converges to 1, i.e. LHS $<$ RHS.
+
+Since both LHS and RHS are continuous functions of $\Delta$, the equation has a solution $\Delta_n \in (0,n^{-\delta}) \subset (0, 1)$ for each $n$.
+
+\subsection*{Part d}
+
+\[
+  R(n,m, \Delta) = m\Delta + n\Delta\exp{\frac{-m\Delta^2}{2}}
+\]
+
+\begin{align*}
+  \min_{1 \leq m \leq n} \max_{0 \leq \Delta \leq 1} R(n,m,\Delta) &= \min(\\
+                                                                   &\min_{1 \leq m \leq n^{2/3 - \delta}} \max_{0 \leq \Delta \leq 1} R(n,m,\Delta),\\
+                                                                   &\min_{n^{2/3 - \delta} \leq m \leq n^{2/3 + \delta}} \max_{0 \leq \Delta \leq 1} R(n,m,\Delta), \\
+                                                                   &\min_{n^{2/3 + \delta} \leq m \leq n} \max_{0 \leq \Delta \leq 1} R(n,m,\Delta)\\ 
+                                                                   &)
+\end{align*}
+But from above 
+\begin{align*}
+  \min_{1 \leq m \leq n} \max_{0 \leq \Delta \leq 1} R(n,m,\Delta) &= \min(\\
+                                                                   & O(n^{2/3+\delta}),\\
+                                                                   &\min_{n^{2/3 - \delta} \leq m \leq n^{2/3 + \delta}} \max_{0 \leq \Delta \leq 1} R(n,m,\Delta), \\
+                                                                   &O(n^{2/3})\\
+                                                                   &)
+\end{align*}
+But this is true for all $\delta > 0$. So, 
+\begin{align*}
+  \min_{1 \leq m \leq n} \max_{0 \leq \Delta \leq 1} R(n,m,\Delta) &= \min(\\
+                                                                   & O(n^{2/3+0}),\\
+                                                                   &O(n^{2/3})\\
+                                                                   &)
+\end{align*}
+That is, 
+$$\min_{1 \leq m \leq n} \max_{0 \leq \Delta \leq 1} R(n,m,\Delta) = O(n^{2/3}) $$
+
+\section*{Problem 4}
+
+INCOMPLETE; WILL UPDATE SOON
+\end{document}

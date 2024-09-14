@@ -1,0 +1,8 @@
+.venv
+__py**
+*.aux
+*.fls
+*.log
+*.gz
+*.zip
+*.*mk
